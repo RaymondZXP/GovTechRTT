@@ -21,7 +21,7 @@
 # SOFTWARE.
 
 PROJECT_NAME := radio_001
-TARGETS      := nrf52840_xxaa
+TARGETS      := nrf52840_xxaa #nrf52840_xxaa
 
 export OUTPUT_FILENAME
 #MAKEFILE_NAME := $(CURDIR)/$(word $(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST))
@@ -112,6 +112,7 @@ ASM_SOURCE_FILES  += \
 #includes common to all targets
 INC_PATHS += \
   -I$(PROJ_DIR)/radio_A/product/nrf52840 \
+  -I$(PROJ_DIR)/radio_A/product/nrf52833 \
   -I$(PROJ_DIR)/lib_sdk/components/libraries/strerror \
   -I$(PROJ_DIR)/lib_sdk/components/libraries/util \
   -I$(PROJ_DIR)/lib_sdk/components/libraries/balloc \
