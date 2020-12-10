@@ -481,7 +481,7 @@ LOAD linker stubs
  .debug_ranges  0x0000000000000068       0x38 _build/timer.o
  .debug_ranges  0x00000000000000a0       0x40 _build/system_nrf52840.o
 
-.debug_macro    0x0000000000000000    0x20dce
+.debug_macro    0x0000000000000000    0x20dd8
  .debug_macro   0x0000000000000000      0x10d _build/radio_002.o
  .debug_macro   0x000000000000010d      0xaa2 _build/radio_002.o
  .debug_macro   0x0000000000000baf       0x3b _build/radio_002.o
@@ -497,30 +497,30 @@ LOAD linker stubs
  .debug_macro   0x0000000000001f22      0x392 _build/radio_002.o
  .debug_macro   0x00000000000022b4     0xccbe _build/radio_002.o
  .debug_macro   0x000000000000ef72       0x22 _build/radio_002.o
- .debug_macro   0x000000000000ef94      0x104 _build/timer.o
- .debug_macro   0x000000000000f098       0x10 _build/timer.o
- .debug_macro   0x000000000000f0a8       0x22 _build/timer.o
- .debug_macro   0x000000000000f0ca       0x3b _build/timer.o
- .debug_macro   0x000000000000f105       0x3b _build/timer.o
- .debug_macro   0x000000000000f140      0x402 _build/timer.o
- .debug_macro   0x000000000000f542    0x10c7a _build/timer.o
- .debug_macro   0x00000000000201bc      0xa65 _build/timer.o
- .debug_macro   0x0000000000020c21       0x96 _build/timer.o
- .debug_macro   0x0000000000020cb7       0x26 _build/timer.o
- .debug_macro   0x0000000000020cdd       0xf1 _build/system_nrf52840.o
+ .debug_macro   0x000000000000ef94      0x109 _build/timer.o
+ .debug_macro   0x000000000000f09d       0x10 _build/timer.o
+ .debug_macro   0x000000000000f0ad       0x22 _build/timer.o
+ .debug_macro   0x000000000000f0cf       0x3b _build/timer.o
+ .debug_macro   0x000000000000f10a       0x3b _build/timer.o
+ .debug_macro   0x000000000000f145      0x402 _build/timer.o
+ .debug_macro   0x000000000000f547    0x10c7a _build/timer.o
+ .debug_macro   0x00000000000201c1      0xa65 _build/timer.o
+ .debug_macro   0x0000000000020c26       0x96 _build/timer.o
+ .debug_macro   0x0000000000020cbc       0x26 _build/timer.o
+ .debug_macro   0x0000000000020ce2       0xf6 _build/system_nrf52840.o
 
 .debug_line     0x0000000000000000     0x11ac
  .debug_line    0x0000000000000000      0x74d _build/radio_002.o
  .debug_line    0x000000000000074d      0x501 _build/timer.o
  .debug_line    0x0000000000000c4e      0x55e _build/system_nrf52840.o
 
-.debug_str      0x0000000000000000    0x7a076
- .debug_str     0x0000000000000000    0x5328b _build/radio_002.o
-                                      0x53e17 (size before relaxing)
- .debug_str     0x000000000005328b    0x26989 _build/timer.o
-                                      0x736ba (size before relaxing)
- .debug_str     0x0000000000079c14      0x462 _build/system_nrf52840.o
-                                      0x73b60 (size before relaxing)
+.debug_str      0x0000000000000000    0x7a06e
+ .debug_str     0x0000000000000000    0x53283 _build/radio_002.o
+                                      0x53e0f (size before relaxing)
+ .debug_str     0x0000000000053283    0x26989 _build/timer.o
+                                      0x736b2 (size before relaxing)
+ .debug_str     0x0000000000079c0c      0x462 _build/system_nrf52840.o
+                                      0x73b58 (size before relaxing)
 
 .debug_loc      0x0000000000000000       0x15
  .debug_loc     0x0000000000000000       0x15 _build/timer.o

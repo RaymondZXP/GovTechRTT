@@ -51,15 +51,20 @@ Use guide for linux ubuntu system
 The original repo displays the output on the externally connected OED, it is now changed to log on the putty window through UART.
 
 ## Issues
-1. For the output result, the result is not changing even when you move the two boards apart
-    - There might be some parts of the code where I modfiled incorrectly. There is some parts of the original code where I need sometime to understand. 
-    - Not 100% sure the number I am logging on putty is the distance measured
+1. Distance calculation parameter tunning
+    For the calculation of the distance from the time difference measured at radio_A, there are a few parameters we need to tune:
+        - The process time at radio_B between it receives the package and sends the response. Possible ways to measure:
+            1. Place two boards close to each other and just note down the minimum time measured (sort of like a universal magic number)
+            2. Start a clock at radio_B, in the package send back to radio_A, send the process time measured here
 
 2. Change the project configuration to 52833
-    - The original project is built on NRF52840, therefore it will be necessary for us to change the configs to 52833.
+    - The original project is built on NRF52840, although somehow now it can be flashed on the NRF52833 board, we need to change the configuration later.
     - I have tried to change some parameters in the MakeFile, (board target and PCA and also the source paths), but I am running into some build errors when I change it. I am still figuring out how to change the configs
 3. Trilateration implementation
-    - After we have resolved the above issue and can obtain an accurate distance between two boards, how can we modify the code to do tracking with trilateration
+    - Receiving packages from multiple slaves. How does the master receive packages from multiple salves to calculate different RTT (channel hopping?)
+    - Better way of labelling the anchors for trilateration. The NRF devZone says there is no way to identify the board with serial ID etc with the firmware and the current measure is to mannually label the anchors, is there better way to label them?
+
+
 
 
 # References

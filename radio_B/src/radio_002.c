@@ -47,7 +47,7 @@ static uint32_t dbgcnt1=0;
 static uint32_t tx_pkt_counter = 0;
 
 static uint8_t response_test_frame[255] = 
-    {0x00, 0x04, 0xFF, 0xC1, 0xFB, 0xE8};
+    {0x00, 0x04, 0xFF, 0xC1, 0xFB, 0x01};
 
 
 /**
@@ -116,7 +116,7 @@ int main(void)
     }
     
     /* Configure the timer with prescaler 8,  counts every 256 cycle of timer clock (16MHz) */
-    timer0_capture_init(8); 
+    timer0_capture_init(0); 
   
     nrf_radio_init();
     setup_leds();
@@ -130,6 +130,8 @@ int main(void)
 
         NRF_GPIO->OUTCLR = 1 << GPIO_NUMBER_LED0;  /* Rx LED On */
         NRF_GPIO->OUTSET = 1 << GPIO_NUMBER_LED1;  /* Tx LED Off */
+
+
 
         /* Wait for packet */
         while (NRF_RADIO->EVENTS_DISABLED == 0)

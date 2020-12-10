@@ -20,11 +20,12 @@
 #define DATABASE 0x20001000 /** Base address for measurement database */
 #define DATA_SIZE 128
 #define NUM_BINS 128
+#define NUM_SLAVES 4
 #define NUMBER_OF_MEASUREMENTS NUM_BINS * 10
 
 #define BLE2M
 
-static uint8_t test_frame[255] = { 0x00, 0x04, 0xFF, 0xC1, 0xFB, 0xE8 };
+static uint8_t test_frame[255] = {0x00, 0x04, 0xFF, 0xC1, 0xFB, 0xE7};
 
 static uint32_t tx_pkt_counter = 0;
 static uint32_t radio_freq = 78;
@@ -37,14 +38,14 @@ static uint32_t rx_timeouts = 0;
 static uint32_t rx_ignored = 0;
 static uint8_t rx_test_frame[256];
 
-static uint32_t database[DATA_SIZE] __attribute__((section(".ARM.__at_DATABASE")));
+static uint32_t database[NUM_SLAVES][DATA_SIZE] __attribute__((section(".ARM.__at_DATABASE")));
 static uint32_t dbptr = 0;
-static uint32_t bincnt[NUM_BINS];
+static uint32_t bincnt[NUM_SLAVES][NUM_BINS];
 
 static uint32_t highper = 0;
 static uint32_t txcntw = 0;
 
-static int radio_B_process_time= 4620;
+static int radio_B_process_time = 4620; //need to tune this number
 
 void nrf_radio_init(void)
 {
@@ -116,18 +117,25 @@ float calc_dist()
 {
   float val = 0;
   int sum = 0;
-
-  for (int i = 0; i < NUM_BINS; i++)
+  for (int s = 0; s < NUM_SLAVES; s++)
   {
-    val += database[i] * (i + 1);  // number of measurements* traval time measured
-    sum += database[i];            // number of measurements
-  }
-  val = val / sum;
-  // val = 0.5 * 18.737 * val;
 
-  NRF_LOG_INFO("Target Distance:" NRF_LOG_FLOAT_MARKER "m\r\n", NRF_LOG_FLOAT(val));
-  NRF_LOG_FLUSH();
-  return val;
+    for (int i = 0; i < NUM_BINS; i++)
+    {
+      val += database[s][i] * (i + 1); // number of measurements* traval time measured
+      sum += database[s][i];           // number of measurements
+    }
+    val = val / sum;
+    // val = 0.5 * 18.737 * val;
+
+    NRF_LOG_INFO("Target Distance from slave %d:"NRF_LOG_FLOAT_MARKER "m\r\n", s,NRF_LOG_FLOAT(val));
+    NRF_LOG_FLUSH();
+
+    val = 0;
+    sum = 0;
+  }
+
+  return 0.0;
 }
 
 int main(void)
@@ -139,13 +147,16 @@ int main(void)
   NRF_LOG_FLUSH();
 
   uint32_t tempval, tempval1;
-  int j, binNum;
+  int binNum;
 
   NRF_CLOCK->EVENTS_HFCLKSTARTED = 0;
   NRF_CLOCK->TASKS_HFCLKSTART = 1;
 
   /* Puts zeros into bincnt */
-  memset(bincnt, 0, sizeof bincnt);
+  for (int i = 0; i < NUM_SLAVES; i++)
+  {
+    memset(bincnt[i], 0, sizeof bincnt[i]);
+  }
 
   while (NRF_CLOCK->EVENTS_HFCLKSTARTED == 0)
   {
@@ -165,7 +176,6 @@ int main(void)
     {
       NRF_RADIO->PACKETPTR = (uint32_t)test_frame; /* Switch to tx buffer */
       NRF_RADIO->TASKS_RXEN = 0x0;
-
 
       NRF_GPIO->OUTSET = 1 << GPIO_NUMBER_LED0; /* Rx LED Off */
       NRF_GPIO->OUTCLR = 1 << GPIO_NUMBER_LED1; /* Tx LED On */
@@ -258,9 +268,10 @@ int main(void)
            * Check the sequence number in the received packet against our tx packet counter
            */
           rx_pkt_counter_crcok++;
-          tempval = ((rx_test_frame[2] << 8) + (rx_test_frame[3]));\
-          NRF_LOG_INFO(" Anchor ID: %d", rx_test_frame[4]);
-          NRF_LOG_FLUSH();
+          tempval = ((rx_test_frame[2] << 8) + (rx_test_frame[3]));
+          int slave_id = rx_test_frame[5];
+          // NRF_LOG_INFO(" Anchor ID: %d", rx_test_frame[5]);
+          // NRF_LOG_FLUSH();
           tempval1 = tx_pkt_counter - 1;
 
           if (tempval != (tempval1 & 0x0000FFFF))
@@ -277,7 +288,7 @@ int main(void)
             binNum = telp - radio_B_process_time; /* Magic number to trim away dwell time in device B, etc */
 
             if ((binNum >= 0) && (binNum < NUM_BINS))
-              bincnt[binNum]++;
+              bincnt[slave_id][binNum]++;
 
             dbptr++;
             NRF_TIMER0->TASKS_CLEAR = 1;
@@ -286,11 +297,15 @@ int main(void)
       }
       NRF_RADIO->EVENTS_DISABLED = 0;
     }
-    for (j = 0; j < NUM_BINS; j++)
+    for (int j = 0; j < NUM_SLAVES; j++)
     {
-      database[j] = bincnt[j];
-      bincnt[j] = 0;
+      for (int k = 0; k < NUM_BINS; k++)
+      {
+        database[j][k] = bincnt[j][k];
+        bincnt[j][k] = 0;
+      }
     }
+
     dbptr = 0;
 
     calc_dist();
