@@ -69,7 +69,7 @@ The original repo displays the output on the externally connected OED, it is now
 
 # References
 
-Setting up the environment: https://devzone.nordicsemi.com/nordic/nordic-blog/b/blog/posts/development-with-gcc-and-eclipse
+Setting up the environment: https://devzone.nordicsemi.com/nordic/nordic-blog/b/blog/posts/development-with-gcc-and-eclipse \n
 Some paper: http://ethesisarchive.library.tu.ac.th/thesis/2016/TU_2016_5722040531_7217_4921.pdf
 
 
