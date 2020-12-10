@@ -24,8 +24,6 @@
 
 #define BLE2M
 
-#define CYAN 0x07FF /** Background color for ili9341 LCD display */
-
 static uint8_t test_frame[255] = { 0x00, 0x04, 0xFF, 0xC1, 0xFB, 0xE8 };
 
 static uint32_t tx_pkt_counter = 0;
@@ -46,8 +44,7 @@ static uint32_t bincnt[NUM_BINS];
 static uint32_t highper = 0;
 static uint32_t txcntw = 0;
 
-
-
+static int radio_B_process_time= 4620;
 
 void nrf_radio_init(void)
 {
@@ -119,13 +116,17 @@ float calc_dist()
 {
   float val = 0;
   int sum = 0;
+
   for (int i = 0; i < NUM_BINS; i++)
   {
-    val += database[i] * (i + 1);
-    sum += database[i];
+    val += database[i] * (i + 1);  // number of measurements* traval time measured
+    sum += database[i];            // number of measurements
   }
   val = val / sum;
-  // val = 0.5*18.737*val;
+  // val = 0.5 * 18.737 * val;
+
+  NRF_LOG_INFO("Target Distance:" NRF_LOG_FLOAT_MARKER "m\r\n", NRF_LOG_FLOAT(val));
+  NRF_LOG_FLUSH();
   return val;
 }
 
@@ -138,7 +139,7 @@ int main(void)
   NRF_LOG_FLUSH();
 
   uint32_t tempval, tempval1;
-  int  j, binNum;
+  int j, binNum;
 
   NRF_CLOCK->EVENTS_HFCLKSTARTED = 0;
   NRF_CLOCK->TASKS_HFCLKSTART = 1;
@@ -164,8 +165,7 @@ int main(void)
     {
       NRF_RADIO->PACKETPTR = (uint32_t)test_frame; /* Switch to tx buffer */
       NRF_RADIO->TASKS_RXEN = 0x0;
-      //   NRF_LOG_INFO("TX started");
-      //   NRF_LOG_FLUSH();
+
 
       NRF_GPIO->OUTSET = 1 << GPIO_NUMBER_LED0; /* Rx LED Off */
       NRF_GPIO->OUTCLR = 1 << GPIO_NUMBER_LED1; /* Tx LED On */
@@ -221,8 +221,7 @@ int main(void)
       NRF_GPIO->OUTSET = 1 << GPIO_NUMBER_LED1; /* Tx LED Off */
       NRF_RADIO->TASKS_TXEN = 0x0;
       NRF_RADIO->TASKS_RXEN = 0x1;
-      //   NRF_LOG_INFO("RX Started");
-      //   NRF_LOG_FLUSH();
+
       NRF_RADIO->PACKETPTR = (uint32_t)rx_test_frame; /* Switch to rx buffer*/
 
       /* Wait for response or timeout */
@@ -235,8 +234,6 @@ int main(void)
       /* Now, did we time out? */
       if (timeout >= 2048)
       {
-        // NRF_LOG_INFO("RX Timeout");
-        // NRF_LOG_FLUSH();
         /* Timeout, stop radio manually */
         NRF_RADIO->TASKS_STOP = 1;
         NRF_RADIO->TASKS_DISABLE = 1;
@@ -261,7 +258,9 @@ int main(void)
            * Check the sequence number in the received packet against our tx packet counter
            */
           rx_pkt_counter_crcok++;
-          tempval = ((rx_test_frame[2] << 8) + (rx_test_frame[3]));
+          tempval = ((rx_test_frame[2] << 8) + (rx_test_frame[3]));\
+          NRF_LOG_INFO(" Anchor ID: %d", rx_test_frame[4]);
+          NRF_LOG_FLUSH();
           tempval1 = tx_pkt_counter - 1;
 
           if (tempval != (tempval1 & 0x0000FFFF))
@@ -271,7 +270,11 @@ int main(void)
             /* Packet is good, update stats */
             NRF_TIMER0->TASKS_STOP = 1;
             telp = NRF_TIMER0->CC[0];
-            binNum = telp - 4613; /* Magic number to trim away dwell time in device B, etc */
+
+            // NRF_LOG_INFO("round trip time measured: %d", telp);
+            // NRF_LOG_FLUSH();
+
+            binNum = telp - radio_B_process_time; /* Magic number to trim away dwell time in device B, etc */
 
             if ((binNum >= 0) && (binNum < NUM_BINS))
               bincnt[binNum]++;
@@ -290,14 +293,7 @@ int main(void)
     }
     dbptr = 0;
 
-    char buf[5] = "";
-    gcvt(calc_dist(), 5, buf);
-
-    int numClock = calc_dist();
-
-
-    NRF_LOG_INFO("Target Distance: 2%f m", numClock);
-    NRF_LOG_FLUSH();
+    calc_dist();
   }
   NRF_GPIO->OUTSET = 1 << GPIO_NUMBER_LED1;
 }
