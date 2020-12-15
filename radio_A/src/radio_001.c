@@ -28,7 +28,8 @@
 static uint8_t test_frame[255] = {0x00, 0x04, 0xFF, 0xC1, 0xFB, 0xE7};
 
 static uint32_t tx_pkt_counter = 0;
-static uint32_t radio_freq = 78;
+static uint32_t radio_freq = 26; // advertising channels: 2400-2402, 2426-2428, 2478-2480
+static uint32_t radio_freqs[3] = {0, 26, 78};
 
 static uint32_t timeout;
 static uint32_t telp;
@@ -45,7 +46,7 @@ static uint32_t bincnt[NUM_SLAVES][NUM_BINS];
 static uint32_t highper = 0;
 static uint32_t txcntw = 0;
 
-static int radio_B_process_time = 4620; //need to tune this number
+static int radio_B_process_time = 4600; //need to tune this number
 
 void nrf_radio_init(void)
 {
@@ -72,7 +73,7 @@ void nrf_radio_init(void)
   NRF_RADIO->CRCCNF = 0x103;
 #endif
 
-  NRF_RADIO->FREQUENCY = (RADIO_FREQUENCY_MAP_Default << RADIO_FREQUENCY_MAP_Pos) +
+  NRF_RADIO->FREQUENCY = (RADIO_FREQUENCY_MAP_Default << RADIO_FREQUENCY_MAP_Pos) + // 0*(2*8)
                          ((radio_freq << RADIO_FREQUENCY_FREQUENCY_Pos) & RADIO_FREQUENCY_FREQUENCY_Msk);
 
   NRF_RADIO->PACKETPTR = (uint32_t)test_frame;
@@ -128,7 +129,7 @@ float calc_dist()
     val = val / sum;
     // val = 0.5 * 18.737 * val;
 
-    NRF_LOG_INFO("Target Distance from slave %d:"NRF_LOG_FLOAT_MARKER "m\r\n", s,NRF_LOG_FLOAT(val));
+    NRF_LOG_INFO("Target Distance from slave %d:" NRF_LOG_FLOAT_MARKER "m\r\n", s, NRF_LOG_FLOAT(val));
     NRF_LOG_FLUSH();
 
     val = 0;
@@ -186,6 +187,9 @@ int main(void)
 
       NRF_TIMER0->TASKS_STOP = 1;
       NRF_TIMER0->TASKS_CLEAR = 1;
+      test_frame[4] = NRF_TIMER0->CC[0]; // transmit the timestamp when the package is transferred
+      NRF_LOG_INFO("Starting Time: %d", test_frame[4]);
+      NRF_LOG_FLUSH();
 
       /* Start Tx */
       NRF_RADIO->TASKS_TXEN = 0x1;
@@ -253,8 +257,7 @@ int main(void)
       }
       else
       {
-        // NRF_LOG_INFO("Package Received");
-        // NRF_LOG_FLUSH();
+
         /* Packet received */
         if (highper < 1)
           NRF_GPIO->OUTCLR = 1 << GPIO_NUMBER_LED0; /* Rx LED On */
@@ -270,8 +273,7 @@ int main(void)
           rx_pkt_counter_crcok++;
           tempval = ((rx_test_frame[2] << 8) + (rx_test_frame[3]));
           int slave_id = rx_test_frame[5];
-          // NRF_LOG_INFO(" Anchor ID: %d", rx_test_frame[5]);
-          // NRF_LOG_FLUSH();
+
           tempval1 = tx_pkt_counter - 1;
 
           if (tempval != (tempval1 & 0x0000FFFF))
@@ -282,16 +284,14 @@ int main(void)
             NRF_TIMER0->TASKS_STOP = 1;
             telp = NRF_TIMER0->CC[0];
 
-            // NRF_LOG_INFO("round trip time measured: %d", telp);
-            // NRF_LOG_FLUSH();
-
-            binNum = telp - radio_B_process_time; /* Magic number to trim away dwell time in device B, etc */
-
+            binNum = telp - rx_test_frame[4] - radio_B_process_time; // time now- time measured when package is transferred - process time at B
+            NRF_LOG_INFO("Receiving Time: %d", telp);
+            NRF_LOG_FLUSH();
             if ((binNum >= 0) && (binNum < NUM_BINS))
               bincnt[slave_id][binNum]++;
 
             dbptr++;
-            NRF_TIMER0->TASKS_CLEAR = 1;
+            // NRF_TIMER0->TASKS_CLEAR = 1;
           }
         }
       }

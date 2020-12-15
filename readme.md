@@ -62,6 +62,8 @@ The original repo displays the output on the externally connected OED, it is now
     - I have tried to change some parameters in the MakeFile, (board target and PCA and also the source paths), but I am running into some build errors when I change it. I am still figuring out how to change the configs
 3. Trilateration implementation
     - Receiving packages from multiple slaves. How does the master receive packages from multiple salves to calculate different RTT (channel hopping?)
+        - for frequency hopping, since we are connecting at the advertising layer, we can only use channel 37(2402 MHz), 38(2426 MHz),39 (2480 MHz)
+        - NRF52833 Gazell Package allows simultaneous connection up to 8 devices (but it is beyond advertising layer)(but only slave can initialise coversation while master is the one can connect up to 8 devices, therefore maybe only applicable to inverse positioning method)
     - Better way of labelling the anchors for trilateration. The NRF devZone says there is no way to identify the board with serial ID etc with the firmware and the current measure is to mannually label the anchors, is there better way to label them?
 
 
@@ -69,7 +71,8 @@ The original repo displays the output on the externally connected OED, it is now
 
 # References
 
-Setting up the environment: https://devzone.nordicsemi.com/nordic/nordic-blog/b/blog/posts/development-with-gcc-and-eclipse \n
+Setting up the environment: https://devzone.nordicsemi.com/nordic/nordic-blog/b/blog/posts/development-with-gcc-and-eclipse 
+
 Some paper: http://ethesisarchive.library.tu.ac.th/thesis/2016/TU_2016_5722040531_7217_4921.pdf
 
 

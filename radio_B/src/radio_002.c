@@ -39,7 +39,7 @@
 
 #define BLE2M
 
-static uint32_t radio_freq = 78;
+static uint32_t radio_freq = 26;
 static uint8_t test_frame[256];
 static uint32_t rx_pkt_counter = 0;
 static uint32_t rx_pkt_counter_crcok = 0;
@@ -146,7 +146,7 @@ int main(void)
             /* CRC ok */
             rx_pkt_counter_crcok++;
 
-            for(i=2;i<4;i++)
+            for(i=2;i<6;i++)
                 response_test_frame[i]=test_frame[i];
         }
         else
@@ -155,7 +155,7 @@ int main(void)
             dbgcnt1++;
 
             /* Insert zeros as sequence number into the response packet indicating crc error to initiator */
-            for(i=2;i<4;i++)
+            for(i=2;i<6;i++)
                 response_test_frame[i]=0;
         }
         
