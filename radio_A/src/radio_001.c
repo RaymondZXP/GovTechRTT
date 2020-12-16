@@ -28,7 +28,6 @@
 static uint8_t test_frame[255] = {0x00, 0x04, 0xFF, 0xC1, 0xFB, 0xE7};
 
 static uint32_t tx_pkt_counter = 0;
-static uint32_t radio_freq = 26;
 static uint32_t radio_freqs[3] = {0, 26, 78};
 
 static uint32_t timeout;
@@ -40,14 +39,16 @@ static uint32_t rx_ignored = 0;
 static uint8_t rx_test_frame[256];
 
 static uint32_t database[NUM_SLAVES][DATA_SIZE] __attribute__((section(".ARM.__at_DATABASE")));
-static uint32_t dbptr = 0;
+// static uint32_t dbptr = 0;
 static uint32_t bincnt[NUM_SLAVES][NUM_BINS];
 
 static uint32_t highper = 0;
 static uint32_t txcntw = 0;
 
 static int radio_B_process_time = 4620; //need to tune this
+
 int channel_index = 1;
+volatile bool freq_change = false;
 
 void nrf_radio_init(void)
 {
@@ -83,7 +84,7 @@ void nrf_radio_init(void)
   NRF_RADIO->TXPOWER = 0x0;
 }
 
-void nrf_radio_switch_channel(radio_frequency_index)
+void nrf_radio_switch_channel(int radio_frequency_index)
 {
   NRF_RADIO->TASKS_STOP = 1;
   NRF_RADIO->TASKS_DISABLE = 1;
@@ -91,18 +92,29 @@ void nrf_radio_switch_channel(radio_frequency_index)
                          ((radio_freqs[radio_frequency_index] << RADIO_FREQUENCY_FREQUENCY_Pos) & RADIO_FREQUENCY_FREQUENCY_Msk);
 }
 
-// void TIMER1_IRQHandler(void)
-// {
-//   if ((NRF_TIMER1->EVENTS_COMPARE[0] != 0) && ((NRF_TIMER1->INTENSET & TIMER_INTENSET_COMPARE0_Msk) != 0))
-//   {
-//     NRF_TIMER1->EVENTS_COMPARE[0] = 0; //Clear compare register 0 event
-//     channel_index = (channel_index + 1) % 3;
+void timer1_capture_init(uint32_t prescaler)
+{
+  NRF_TIMER1->MODE = TIMER_MODE_MODE_Timer;          // Set the timer in Counter Mode
+  NRF_TIMER1->TASKS_CLEAR = 1;                       // clear the task first to be usable for later
+  NRF_TIMER1->PRESCALER = prescaler;                 //Set prescaler. Higher number gives slower timer. Prescaler = 0 gives 16MHz timer
+  NRF_TIMER1->BITMODE = TIMER_BITMODE_BITMODE_16Bit; //Set counter to 16 bit resolution
+  NRF_TIMER1->CC[0] = 10000;                         //Set value for TIMER1 compare register 0
 
-//     // nrf_radio_switch_channel(channel_index);
-//     NRF_LOG_INFO("Scheduler Triggered, index: %d", channel_index);
-//     NRF_LOG_FLUSH();
-//   }
-// }
+  // Enable interrupt on Timer 1 for CC[0] compare match events
+  NRF_TIMER1->INTENSET = (TIMER_INTENSET_COMPARE0_Enabled << TIMER_INTENSET_COMPARE0_Pos);
+  NVIC_EnableIRQ(TIMER1_IRQn);
+
+  NRF_TIMER1->TASKS_START = 1; // Start TIMER1
+}
+
+void TIMER1_IRQHandler(void)
+{
+  if ((NRF_TIMER1->EVENTS_COMPARE[0] != 0) && ((NRF_TIMER1->INTENSET & TIMER_INTENSET_COMPARE0_Msk) != 0))
+  {
+    NRF_TIMER1->EVENTS_COMPARE[0] = 0; //Clear compare register 0 event
+    freq_change = true;
+  }
+}
 
 void nrf_ppi_config(void)
 {
@@ -137,7 +149,7 @@ static void log_init(void)
   NRF_LOG_DEFAULT_BACKENDS_INIT();
 }
 
-float calc_dist()
+float calc_dist(void)
 {
   float val = 0;
   int sum = 0;
@@ -156,6 +168,7 @@ float calc_dist()
     {
       val = val / sum;
       NRF_LOG_INFO("Target Distance from slave %d:" NRF_LOG_FLOAT_MARKER "m\r\n", s, NRF_LOG_FLOAT(val));
+      NRF_LOG_INFO("Number of measurement: %d", sum);
       NRF_LOG_FLUSH();
     }
 
@@ -176,6 +189,7 @@ int main(void)
 
   uint32_t tempval, tempval1;
   int binNum;
+
   // int channel_index = 1;
 
   NRF_CLOCK->EVENTS_HFCLKSTARTED = 0;
@@ -193,7 +207,7 @@ int main(void)
 
   /* Configure the timer with prescaler 0, counts every 1 cycle of timer clock (16MHz) */
   timer0_capture_init(0);
-  // timer1_capture_init(6);
+  timer1_capture_init(6);
 
   nrf_radio_init();
   NRF_CLOCK->TASKS_HFCLKSTART = 1; /* Start HFCLK */
@@ -202,12 +216,17 @@ int main(void)
 
   while (true)
   {
-    nrf_radio_switch_channel(channel_index);
-    channel_index = (channel_index + 1) % 3;
 
-    NRF_LOG_INFO("Now at Channel: %d", NRF_RADIO->FREQUENCY);
-    NRF_LOG_FLUSH();
-    while (dbptr < NUMBER_OF_MEASUREMENTS)
+    if (freq_change)
+    {
+      freq_change = !freq_change;
+      channel_index = (channel_index + 1) % 3;
+      nrf_radio_switch_channel(channel_index);
+      NRF_LOG_INFO("channel changed to: %d", NRF_RADIO->FREQUENCY);
+      NRF_LOG_FLUSH();
+    }
+
+    while (!freq_change)
     {
       NRF_RADIO->PACKETPTR = (uint32_t)test_frame; /* Switch to tx buffer */
       NRF_RADIO->TASKS_RXEN = 0x0;
@@ -284,7 +303,7 @@ int main(void)
         while (NRF_RADIO->EVENTS_DISABLED == 0)
           ;
         rx_timeouts++;
-        break;
+        // break;
       }
       else
       {
@@ -322,7 +341,6 @@ int main(void)
             if ((binNum >= 0) && (binNum < NUM_BINS))
               bincnt[slave_id][binNum]++;
 
-            dbptr++;
             NRF_TIMER0->TASKS_CLEAR = 1;
           }
         }
@@ -338,7 +356,7 @@ int main(void)
       }
     }
 
-    dbptr = 0;
+    // dbptr = 0;
 
     calc_dist();
   }

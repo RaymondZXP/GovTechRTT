@@ -96,10 +96,6 @@ C_SOURCE_FILES += \
   $(PROJ_DIR)/lib_sdk/modules/nrfx/drivers/src/nrfx_spim.c \
   $(PROJ_DIR)/lib_sdk/modules/nrfx/drivers/src/nrfx_uart.c \
   $(PROJ_DIR)/lib_sdk/modules/nrfx/drivers/src/nrfx_uarte.c \
-  $(PROJ_DIR)/lib_sdk/external/thedotfactory_fonts//orkney24pts.c \
-  $(PROJ_DIR)/lib_sdk/external/thedotfactory_fonts/orkney8pts.c \
-  $(PROJ_DIR)/lib_sdk/components/drivers_ext/ili9341/ili9341.c \
-  $(PROJ_DIR)/lib_sdk/components/drivers_ext/st7735/st7735.c \
   $(PROJ_DIR)/lib_sdk/external/segger_rtt/SEGGER_RTT_Syscalls_GCC.c \
   $(PROJ_DIR)/lib_sdk/external/segger_rtt/SEGGER_RTT_printf.c \
   $(PROJ_DIR)/lib_sdk/external/segger_rtt/SEGGER_RTT.c \

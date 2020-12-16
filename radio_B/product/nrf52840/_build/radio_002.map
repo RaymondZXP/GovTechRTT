@@ -54,8 +54,12 @@ Discarded input sections
  .text          0x0000000000000000        0x0 _build/radio_002.o
  .data          0x0000000000000000        0x0 _build/radio_002.o
  .bss           0x0000000000000000        0x0 _build/radio_002.o
+ .text.nrf_radio_switch_channel
+                0x0000000000000000       0x20 _build/radio_002.o
  .text.setup_leds
                 0x0000000000000000       0x10 _build/radio_002.o
+ .text.timer1_init
+                0x0000000000000000       0x3c _build/radio_002.o
  .group         0x0000000000000000        0xc _build/timer.o
  .group         0x0000000000000000        0xc _build/timer.o
  .group         0x0000000000000000        0xc _build/timer.o
@@ -84,10 +88,23 @@ Discarded input sections
                 0x0000000000000000       0x1c _build/timer.o
  .text.timer0_timeout
                 0x0000000000000000       0x14 _build/timer.o
+ .text.timer0_capture_init
+                0x0000000000000000       0x40 _build/timer.o
  .text.timer0_capture_start
                 0x0000000000000000        0xc _build/timer.o
  .text.timer0_capture_now
                 0x0000000000000000       0x14 _build/timer.o
+ .text.timer1_start
+                0x0000000000000000       0x1c _build/timer.o
+ .text.timer1_timeout
+                0x0000000000000000       0x14 _build/timer.o
+ .debug_info    0x0000000000000000      0x3a4 _build/timer.o
+ .debug_abbrev  0x0000000000000000      0x168 _build/timer.o
+ .debug_loc     0x0000000000000000       0x15 _build/timer.o
+ .debug_aranges
+                0x0000000000000000       0x58 _build/timer.o
+ .debug_ranges  0x0000000000000000       0x48 _build/timer.o
+ .debug_macro   0x0000000000000000      0x109 _build/timer.o
  .debug_macro   0x0000000000000000      0xaa2 _build/timer.o
  .debug_macro   0x0000000000000000       0x22 _build/timer.o
  .debug_macro   0x0000000000000000       0x8e _build/timer.o
@@ -96,8 +113,23 @@ Discarded input sections
  .debug_macro   0x0000000000000000       0x6a _build/timer.o
  .debug_macro   0x0000000000000000      0x1df _build/timer.o
  .debug_macro   0x0000000000000000       0x22 _build/timer.o
+ .debug_macro   0x0000000000000000       0x10 _build/timer.o
+ .debug_macro   0x0000000000000000       0x22 _build/timer.o
+ .debug_macro   0x0000000000000000       0x3b _build/timer.o
+ .debug_macro   0x0000000000000000       0x3b _build/timer.o
  .debug_macro   0x0000000000000000       0x50 _build/timer.o
  .debug_macro   0x0000000000000000      0xe66 _build/timer.o
+ .debug_macro   0x0000000000000000      0x402 _build/timer.o
+ .debug_macro   0x0000000000000000    0x10c7a _build/timer.o
+ .debug_macro   0x0000000000000000      0xa65 _build/timer.o
+ .debug_macro   0x0000000000000000       0x96 _build/timer.o
+ .debug_macro   0x0000000000000000       0x26 _build/timer.o
+ .debug_line    0x0000000000000000      0x55f _build/timer.o
+ .debug_str     0x0000000000000000    0x736ce _build/timer.o
+ .comment       0x0000000000000000       0x4d _build/timer.o
+ .debug_frame   0x0000000000000000       0xa8 _build/timer.o
+ .ARM.attributes
+                0x0000000000000000       0x34 _build/timer.o
  .group         0x0000000000000000        0xc _build/system_nrf52840.o
  .group         0x0000000000000000        0xc _build/system_nrf52840.o
  .group         0x0000000000000000        0xc _build/system_nrf52840.o
@@ -158,7 +190,7 @@ RAM              0x0000000020000000 0x0000000000008000 xrw
 Linker script and memory map
 
 
-.text           0x0000000000000000      0x738
+.text           0x0000000000000000      0x7a0
  *(.isr_vector)
  .isr_vector    0x0000000000000000      0x200 _build/gcc_startup_nrf52840.o
                 0x0000000000000000                __isr_vector
@@ -180,86 +212,85 @@ Linker script and memory map
  .text.nrf_radio_init
                 0x0000000000000340       0x98 _build/radio_002.o
                 0x0000000000000340                nrf_radio_init
+ .text.TIMER1_IRQHandler
+                0x00000000000003d8       0x28 _build/radio_002.o
+                0x00000000000003d8                TIMER1_IRQHandler
  .text.startup.main
-                0x00000000000003d8      0x170 _build/radio_002.o
-                0x00000000000003d8                main
+                0x0000000000000400      0x1e4 _build/radio_002.o
+                0x0000000000000400                main
  .text.HardFault_Handler
-                0x0000000000000548        0x4 _build/radio_002.o
-                0x0000000000000548                HardFault_Handler
+                0x00000000000005e4        0x4 _build/radio_002.o
+                0x00000000000005e4                HardFault_Handler
  .text.MemoryManagement_Handler
-                0x000000000000054c        0x4 _build/radio_002.o
-                0x000000000000054c                MemoryManagement_Handler
+                0x00000000000005e8        0x4 _build/radio_002.o
+                0x00000000000005e8                MemoryManagement_Handler
  .text.BusFault_Handler
-                0x0000000000000550        0x4 _build/radio_002.o
-                0x0000000000000550                BusFault_Handler
+                0x00000000000005ec        0x4 _build/radio_002.o
+                0x00000000000005ec                BusFault_Handler
  .text.UsageFault_Handler
-                0x0000000000000554        0x4 _build/radio_002.o
-                0x0000000000000554                UsageFault_Handler
- .text.timer0_capture_init
-                0x0000000000000558       0x40 _build/timer.o
-                0x0000000000000558                timer0_capture_init
+                0x00000000000005f0        0x4 _build/radio_002.o
+                0x00000000000005f0                UsageFault_Handler
  .text.SystemInit
-                0x0000000000000598      0x144 _build/system_nrf52840.o
-                0x0000000000000598                SystemInit
- .text          0x00000000000006dc       0x3c _build/gcc_startup_nrf52840.o
-                0x00000000000006dc                Reset_Handler
-                0x0000000000000704                NMI_Handler
-                0x000000000000070e                SVC_Handler
-                0x0000000000000710                DebugMon_Handler
-                0x0000000000000712                PendSV_Handler
-                0x0000000000000714                SysTick_Handler
-                0x0000000000000716                TIMER2_IRQHandler
-                0x0000000000000716                RTC0_IRQHandler
-                0x0000000000000716                SWI0_EGU0_IRQHandler
-                0x0000000000000716                SWI2_EGU2_IRQHandler
-                0x0000000000000716                GPIOTE_IRQHandler
-                0x0000000000000716                PWM1_IRQHandler
-                0x0000000000000716                POWER_CLOCK_IRQHandler
-                0x0000000000000716                RADIO_IRQHandler
-                0x0000000000000716                PDM_IRQHandler
-                0x0000000000000716                TEMP_IRQHandler
-                0x0000000000000716                QDEC_IRQHandler
-                0x0000000000000716                TIMER3_IRQHandler
-                0x0000000000000716                PWM3_IRQHandler
-                0x0000000000000716                FPU_IRQHandler
-                0x0000000000000716                USBD_IRQHandler
-                0x0000000000000716                SPIM0_SPIS0_TWIM0_TWIS0_SPI0_TWI0_IRQHandler
-                0x0000000000000716                UARTE0_UART0_IRQHandler
-                0x0000000000000716                TIMER4_IRQHandler
-                0x0000000000000716                CRYPTOCELL_IRQHandler
-                0x0000000000000716                I2S_IRQHandler
-                0x0000000000000716                SWI4_EGU4_IRQHandler
-                0x0000000000000716                TIMER0_IRQHandler
-                0x0000000000000716                UARTE1_IRQHandler
-                0x0000000000000716                TIMER1_IRQHandler
-                0x0000000000000716                SPIM3_IRQHandler
-                0x0000000000000716                PWM2_IRQHandler
-                0x0000000000000716                ECB_IRQHandler
-                0x0000000000000716                SPIM1_SPIS1_TWIM1_TWIS1_SPI1_TWI1_IRQHandler
-                0x0000000000000716                Default_Handler
-                0x0000000000000716                SAADC_IRQHandler
-                0x0000000000000716                CCM_AAR_IRQHandler
-                0x0000000000000716                WDT_IRQHandler
-                0x0000000000000716                SWI5_EGU5_IRQHandler
-                0x0000000000000716                RNG_IRQHandler
-                0x0000000000000716                RTC2_IRQHandler
-                0x0000000000000716                PWM0_IRQHandler
-                0x0000000000000716                SWI3_EGU3_IRQHandler
-                0x0000000000000716                RTC1_IRQHandler
-                0x0000000000000716                SWI1_EGU1_IRQHandler
-                0x0000000000000716                SPIM2_SPIS2_SPI2_IRQHandler
-                0x0000000000000716                NFCT_IRQHandler
-                0x0000000000000716                MWU_IRQHandler
-                0x0000000000000716                QSPI_IRQHandler
-                0x0000000000000716                COMP_LPCOMP_IRQHandler
+                0x00000000000005f4      0x144 _build/system_nrf52840.o
+                0x00000000000005f4                SystemInit
+ .text          0x0000000000000738       0x3c _build/gcc_startup_nrf52840.o
+                0x0000000000000738                Reset_Handler
+                0x0000000000000760                NMI_Handler
+                0x000000000000076a                SVC_Handler
+                0x000000000000076c                DebugMon_Handler
+                0x000000000000076e                PendSV_Handler
+                0x0000000000000770                SysTick_Handler
+                0x0000000000000772                TIMER2_IRQHandler
+                0x0000000000000772                RTC0_IRQHandler
+                0x0000000000000772                SWI0_EGU0_IRQHandler
+                0x0000000000000772                SWI2_EGU2_IRQHandler
+                0x0000000000000772                GPIOTE_IRQHandler
+                0x0000000000000772                PWM1_IRQHandler
+                0x0000000000000772                POWER_CLOCK_IRQHandler
+                0x0000000000000772                RADIO_IRQHandler
+                0x0000000000000772                PDM_IRQHandler
+                0x0000000000000772                TEMP_IRQHandler
+                0x0000000000000772                QDEC_IRQHandler
+                0x0000000000000772                TIMER3_IRQHandler
+                0x0000000000000772                PWM3_IRQHandler
+                0x0000000000000772                FPU_IRQHandler
+                0x0000000000000772                USBD_IRQHandler
+                0x0000000000000772                SPIM0_SPIS0_TWIM0_TWIS0_SPI0_TWI0_IRQHandler
+                0x0000000000000772                UARTE0_UART0_IRQHandler
+                0x0000000000000772                TIMER4_IRQHandler
+                0x0000000000000772                CRYPTOCELL_IRQHandler
+                0x0000000000000772                I2S_IRQHandler
+                0x0000000000000772                SWI4_EGU4_IRQHandler
+                0x0000000000000772                TIMER0_IRQHandler
+                0x0000000000000772                UARTE1_IRQHandler
+                0x0000000000000772                SPIM3_IRQHandler
+                0x0000000000000772                PWM2_IRQHandler
+                0x0000000000000772                ECB_IRQHandler
+                0x0000000000000772                SPIM1_SPIS1_TWIM1_TWIS1_SPI1_TWI1_IRQHandler
+                0x0000000000000772                Default_Handler
+                0x0000000000000772                SAADC_IRQHandler
+                0x0000000000000772                CCM_AAR_IRQHandler
+                0x0000000000000772                WDT_IRQHandler
+                0x0000000000000772                SWI5_EGU5_IRQHandler
+                0x0000000000000772                RNG_IRQHandler
+                0x0000000000000772                RTC2_IRQHandler
+                0x0000000000000772                PWM0_IRQHandler
+                0x0000000000000772                SWI3_EGU3_IRQHandler
+                0x0000000000000772                RTC1_IRQHandler
+                0x0000000000000772                SWI1_EGU1_IRQHandler
+                0x0000000000000772                SPIM2_SPIS2_SPI2_IRQHandler
+                0x0000000000000772                NFCT_IRQHandler
+                0x0000000000000772                MWU_IRQHandler
+                0x0000000000000772                QSPI_IRQHandler
+                0x0000000000000772                COMP_LPCOMP_IRQHandler
  *(.init)
- .init          0x0000000000000718        0x4 /home/raymond/gcc-arm-none-eabi-9-2020-q2-update/bin/../lib/gcc/arm-none-eabi/9.3.1/thumb/v7e-m+fp/hard/crti.o
-                0x0000000000000718                _init
- .init          0x000000000000071c        0x8 /home/raymond/gcc-arm-none-eabi-9-2020-q2-update/bin/../lib/gcc/arm-none-eabi/9.3.1/thumb/v7e-m+fp/hard/crtn.o
+ .init          0x0000000000000774        0x4 /home/raymond/gcc-arm-none-eabi-9-2020-q2-update/bin/../lib/gcc/arm-none-eabi/9.3.1/thumb/v7e-m+fp/hard/crti.o
+                0x0000000000000774                _init
+ .init          0x0000000000000778        0x8 /home/raymond/gcc-arm-none-eabi-9-2020-q2-update/bin/../lib/gcc/arm-none-eabi/9.3.1/thumb/v7e-m+fp/hard/crtn.o
  *(.fini)
- .fini          0x0000000000000724        0x4 /home/raymond/gcc-arm-none-eabi-9-2020-q2-update/bin/../lib/gcc/arm-none-eabi/9.3.1/thumb/v7e-m+fp/hard/crti.o
-                0x0000000000000724                _fini
- .fini          0x0000000000000728        0x8 /home/raymond/gcc-arm-none-eabi-9-2020-q2-update/bin/../lib/gcc/arm-none-eabi/9.3.1/thumb/v7e-m+fp/hard/crtn.o
+ .fini          0x0000000000000780        0x4 /home/raymond/gcc-arm-none-eabi-9-2020-q2-update/bin/../lib/gcc/arm-none-eabi/9.3.1/thumb/v7e-m+fp/hard/crti.o
+                0x0000000000000780                _fini
+ .fini          0x0000000000000784        0x8 /home/raymond/gcc-arm-none-eabi-9-2020-q2-update/bin/../lib/gcc/arm-none-eabi/9.3.1/thumb/v7e-m+fp/hard/crtn.o
  *crtbegin.o(.ctors)
  *crtbegin?.o(.ctors)
  *(EXCLUDE_FILE(*crtend.o *crtend?.o) .ctors)
@@ -272,42 +303,44 @@ Linker script and memory map
  *(.dtors)
  *(.rodata*)
  .rodata._global_impure_ptr
-                0x0000000000000730        0x4 /home/raymond/gcc-arm-none-eabi-9-2020-q2-update/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-impure.o)
-                0x0000000000000730                _global_impure_ptr
+                0x000000000000078c        0x4 /home/raymond/gcc-arm-none-eabi-9-2020-q2-update/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-impure.o)
+                0x000000000000078c                _global_impure_ptr
+ .rodata.radio_freqs
+                0x0000000000000790        0xc _build/radio_002.o
  *(.eh_frame*)
- .eh_frame      0x0000000000000734        0x0 /home/raymond/gcc-arm-none-eabi-9-2020-q2-update/bin/../lib/gcc/arm-none-eabi/9.3.1/thumb/v7e-m+fp/hard/crtbegin.o
- .eh_frame      0x0000000000000734        0x4 /home/raymond/gcc-arm-none-eabi-9-2020-q2-update/bin/../lib/gcc/arm-none-eabi/9.3.1/thumb/v7e-m+fp/hard/crtend.o
+ .eh_frame      0x000000000000079c        0x0 /home/raymond/gcc-arm-none-eabi-9-2020-q2-update/bin/../lib/gcc/arm-none-eabi/9.3.1/thumb/v7e-m+fp/hard/crtbegin.o
+ .eh_frame      0x000000000000079c        0x4 /home/raymond/gcc-arm-none-eabi-9-2020-q2-update/bin/../lib/gcc/arm-none-eabi/9.3.1/thumb/v7e-m+fp/hard/crtend.o
 
-.glue_7         0x0000000000000738        0x0
- .glue_7        0x0000000000000738        0x0 linker stubs
+.glue_7         0x00000000000007a0        0x0
+ .glue_7        0x00000000000007a0        0x0 linker stubs
 
-.glue_7t        0x0000000000000738        0x0
- .glue_7t       0x0000000000000738        0x0 linker stubs
+.glue_7t        0x00000000000007a0        0x0
+ .glue_7t       0x00000000000007a0        0x0 linker stubs
 
-.vfp11_veneer   0x0000000000000738        0x0
- .vfp11_veneer  0x0000000000000738        0x0 linker stubs
+.vfp11_veneer   0x00000000000007a0        0x0
+ .vfp11_veneer  0x00000000000007a0        0x0 linker stubs
 
-.v4_bx          0x0000000000000738        0x0
- .v4_bx         0x0000000000000738        0x0 linker stubs
+.v4_bx          0x00000000000007a0        0x0
+ .v4_bx         0x00000000000007a0        0x0 linker stubs
 
-.iplt           0x0000000000000738        0x0
- .iplt          0x0000000000000738        0x0 /home/raymond/gcc-arm-none-eabi-9-2020-q2-update/bin/../lib/gcc/arm-none-eabi/9.3.1/thumb/v7e-m+fp/hard/crtbegin.o
+.iplt           0x00000000000007a0        0x0
+ .iplt          0x00000000000007a0        0x0 /home/raymond/gcc-arm-none-eabi-9-2020-q2-update/bin/../lib/gcc/arm-none-eabi/9.3.1/thumb/v7e-m+fp/hard/crtbegin.o
 
 .ARM.extab
  *(.ARM.extab* .gnu.linkonce.armextab.*)
-                0x0000000000000738                __exidx_start = .
+                0x00000000000007a0                __exidx_start = .
 
-.ARM.exidx      0x0000000000000738        0x8
+.ARM.exidx      0x00000000000007a0        0x8
  *(.ARM.exidx* .gnu.linkonce.armexidx.*)
- .ARM.exidx     0x0000000000000738        0x8 /home/raymond/gcc-arm-none-eabi-9-2020-q2-update/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/crt0.o
+ .ARM.exidx     0x00000000000007a0        0x8 /home/raymond/gcc-arm-none-eabi-9-2020-q2-update/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/crt0.o
                                          0x10 (size before relaxing)
-                0x0000000000000740                __exidx_end = .
-                0x0000000000000740                __etext = .
+                0x00000000000007a8                __exidx_end = .
+                0x00000000000007a8                __etext = .
 
-.rel.dyn        0x0000000000000740        0x0
- .rel.iplt      0x0000000000000740        0x0 /home/raymond/gcc-arm-none-eabi-9-2020-q2-update/bin/../lib/gcc/arm-none-eabi/9.3.1/thumb/v7e-m+fp/hard/crtbegin.o
+.rel.dyn        0x00000000000007a8        0x0
+ .rel.iplt      0x00000000000007a8        0x0 /home/raymond/gcc-arm-none-eabi-9-2020-q2-update/bin/../lib/gcc/arm-none-eabi/9.3.1/thumb/v7e-m+fp/hard/crtbegin.o
 
-.data           0x0000000020000000      0x16c load address 0x0000000000000740
+.data           0x0000000020000000      0x16c load address 0x00000000000007a8
                 0x0000000020000000                __data_start__ = .
  *(vtable)
  *(.data*)
@@ -364,7 +397,7 @@ LOAD /home/raymond/gcc-arm-none-eabi-9-2020-q2-update/bin/../lib/gcc/arm-none-ea
 LOAD /home/raymond/gcc-arm-none-eabi-9-2020-q2-update/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libnosys.a
 END GROUP
 
-.igot.plt       0x000000002000016c        0x0 load address 0x00000000000008ac
+.igot.plt       0x000000002000016c        0x0 load address 0x0000000000000914
  .igot.plt      0x000000002000016c        0x0 /home/raymond/gcc-arm-none-eabi-9-2020-q2-update/bin/../lib/gcc/arm-none-eabi/9.3.1/thumb/v7e-m+fp/hard/crtbegin.o
 
 .fs_data        0x000000002000016c        0x0
@@ -372,42 +405,49 @@ END GROUP
  *(.fs_data)
                 [!provide]                        PROVIDE (__stop_fs_data = .)
 
-.bss            0x000000002000016c      0x12c load address 0x00000000000008ac
+.bss            0x000000002000016c      0x134 load address 0x0000000000000914
                 0x000000002000016c                . = ALIGN (0x4)
                 0x000000002000016c                __bss_start__ = .
  *(.bss*)
  .bss           0x000000002000016c       0x1c /home/raymond/gcc-arm-none-eabi-9-2020-q2-update/bin/../lib/gcc/arm-none-eabi/9.3.1/thumb/v7e-m+fp/hard/crtbegin.o
- .bss.dbgcnt1   0x0000000020000188        0x4 _build/radio_002.o
+ .bss.channel_index
+                0x0000000020000188        0x4 _build/radio_002.o
+                0x0000000020000188                channel_index
+ .bss.dbgcnt1   0x000000002000018c        0x4 _build/radio_002.o
+ .bss.freq_change
+                0x0000000020000190        0x1 _build/radio_002.o
+                0x0000000020000190                freq_change
+ *fill*         0x0000000020000191        0x3 
  .bss.rx_pkt_counter
-                0x000000002000018c        0x4 _build/radio_002.o
+                0x0000000020000194        0x4 _build/radio_002.o
  .bss.rx_pkt_counter_crcok
-                0x0000000020000190        0x4 _build/radio_002.o
+                0x0000000020000198        0x4 _build/radio_002.o
  .bss.test_frame
-                0x0000000020000194      0x100 _build/radio_002.o
+                0x000000002000019c      0x100 _build/radio_002.o
  .bss.tx_pkt_counter
-                0x0000000020000294        0x4 _build/radio_002.o
+                0x000000002000029c        0x4 _build/radio_002.o
  *(COMMON)
-                0x0000000020000298                . = ALIGN (0x4)
-                0x0000000020000298                __bss_end__ = .
+                0x00000000200002a0                . = ALIGN (0x4)
+                0x00000000200002a0                __bss_end__ = .
 
-.heap           0x0000000020000298     0x2000
-                0x0000000020000298                __HeapBase = .
-                0x0000000020000298                __end__ = .
+.heap           0x00000000200002a0     0x2000
+                0x00000000200002a0                __HeapBase = .
+                0x00000000200002a0                __end__ = .
                 [!provide]                        PROVIDE (end = .)
  *(.heap*)
- .heap          0x0000000020000298     0x2000 _build/gcc_startup_nrf52840.o
-                0x0000000020002298                __HeapLimit = .
+ .heap          0x00000000200002a0     0x2000 _build/gcc_startup_nrf52840.o
+                0x00000000200022a0                __HeapLimit = .
 
-.stack_dummy    0x0000000020000298     0x2000
+.stack_dummy    0x00000000200002a0     0x2000
  *(.stack*)
- .stack         0x0000000020000298     0x2000 _build/gcc_startup_nrf52840.o
+ .stack         0x00000000200002a0     0x2000 _build/gcc_startup_nrf52840.o
                 0x0000000020008000                __StackTop = (ORIGIN (RAM) + LENGTH (RAM))
                 0x0000000020006000                __StackLimit = (__StackTop - SIZEOF (.stack_dummy))
                 0x0000000020008000                PROVIDE (__stack = __StackTop)
                 0x0000000000000001                ASSERT ((__StackLimit >= __HeapLimit), region RAM overflowed with stack)
                 0x000000000000016c                DataInitFlashUsed = (__bss_start__ - __data_start__)
-                0x0000000000000740                CodeFlashUsed = (__etext - ORIGIN (FLASH))
-                0x00000000000008ac                TotalFlashUsed = (CodeFlashUsed + DataInitFlashUsed)
+                0x00000000000007a8                CodeFlashUsed = (__etext - ORIGIN (FLASH))
+                0x0000000000000914                TotalFlashUsed = (CodeFlashUsed + DataInitFlashUsed)
                 0x0000000000000001                ASSERT ((TotalFlashUsed <= LENGTH (FLASH)), region FLASH overflowed with .data and user data)
 OUTPUT(_build/radio_002.out elf32-littlearm)
 LOAD linker stubs
@@ -433,55 +473,49 @@ LOAD linker stubs
  .ARM.attributes
                 0x0000000000000170       0x34 _build/radio_002.o
  .ARM.attributes
-                0x00000000000001a4       0x34 _build/timer.o
+                0x00000000000001a4       0x34 _build/system_nrf52840.o
  .ARM.attributes
-                0x00000000000001d8       0x34 _build/system_nrf52840.o
+                0x00000000000001d8       0x1c _build/gcc_startup_nrf52840.o
  .ARM.attributes
-                0x000000000000020c       0x1c _build/gcc_startup_nrf52840.o
+                0x00000000000001f4       0x32 /home/raymond/gcc-arm-none-eabi-9-2020-q2-update/bin/../lib/gcc/arm-none-eabi/9.3.1/thumb/v7e-m+fp/hard/crtend.o
  .ARM.attributes
-                0x0000000000000228       0x32 /home/raymond/gcc-arm-none-eabi-9-2020-q2-update/bin/../lib/gcc/arm-none-eabi/9.3.1/thumb/v7e-m+fp/hard/crtend.o
- .ARM.attributes
-                0x000000000000025a       0x1e /home/raymond/gcc-arm-none-eabi-9-2020-q2-update/bin/../lib/gcc/arm-none-eabi/9.3.1/thumb/v7e-m+fp/hard/crtn.o
+                0x0000000000000226       0x1e /home/raymond/gcc-arm-none-eabi-9-2020-q2-update/bin/../lib/gcc/arm-none-eabi/9.3.1/thumb/v7e-m+fp/hard/crtn.o
 
 .comment        0x0000000000000000       0x4c
  .comment       0x0000000000000000       0x4c _build/radio_002.o
                                          0x4d (size before relaxing)
- .comment       0x000000000000004c       0x4d _build/timer.o
  .comment       0x000000000000004c       0x4d _build/system_nrf52840.o
 
-.debug_frame    0x0000000000000000      0x1f8
+.debug_frame    0x0000000000000000      0x1ac
  .debug_frame   0x0000000000000000       0x28 /home/raymond/gcc-arm-none-eabi-9-2020-q2-update/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-exit.o)
  .debug_frame   0x0000000000000028       0x2c /home/raymond/gcc-arm-none-eabi-9-2020-q2-update/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-init.o)
  .debug_frame   0x0000000000000054       0x20 /home/raymond/gcc-arm-none-eabi-9-2020-q2-update/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-memset.o)
  .debug_frame   0x0000000000000074       0x20 /home/raymond/gcc-arm-none-eabi-9-2020-q2-update/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libnosys.a(_exit.o)
- .debug_frame   0x0000000000000094       0x9c _build/radio_002.o
- .debug_frame   0x0000000000000130       0x88 _build/timer.o
- .debug_frame   0x00000000000001b8       0x40 _build/system_nrf52840.o
+ .debug_frame   0x0000000000000094       0xd8 _build/radio_002.o
+ .debug_frame   0x000000000000016c       0x40 _build/system_nrf52840.o
 
-.debug_info     0x0000000000000000     0x203d
- .debug_info    0x0000000000000000      0xac7 _build/radio_002.o
- .debug_info    0x0000000000000ac7      0x369 _build/timer.o
- .debug_info    0x0000000000000e30     0x120d _build/system_nrf52840.o
+.debug_info     0x0000000000000000     0x2255
+ .debug_info    0x0000000000000000     0x1048 _build/radio_002.o
+ .debug_info    0x0000000000001048     0x120d _build/system_nrf52840.o
 
-.debug_abbrev   0x0000000000000000      0x522
- .debug_abbrev  0x0000000000000000      0x1de _build/radio_002.o
- .debug_abbrev  0x00000000000001de      0x168 _build/timer.o
- .debug_abbrev  0x0000000000000346      0x1dc _build/system_nrf52840.o
+.debug_abbrev   0x0000000000000000      0x49f
+ .debug_abbrev  0x0000000000000000      0x2c3 _build/radio_002.o
+ .debug_abbrev  0x00000000000002c3      0x1dc _build/system_nrf52840.o
 
-.debug_aranges  0x0000000000000000       0xc0
+.debug_loc      0x0000000000000000       0x80
+ .debug_loc     0x0000000000000000       0x80 _build/radio_002.o
+
+.debug_aranges  0x0000000000000000       0x90
  .debug_aranges
-                0x0000000000000000       0x50 _build/radio_002.o
+                0x0000000000000000       0x68 _build/radio_002.o
  .debug_aranges
-                0x0000000000000050       0x48 _build/timer.o
- .debug_aranges
-                0x0000000000000098       0x28 _build/system_nrf52840.o
+                0x0000000000000068       0x28 _build/system_nrf52840.o
 
-.debug_ranges   0x0000000000000000       0xe0
- .debug_ranges  0x0000000000000000       0x68 _build/radio_002.o
- .debug_ranges  0x0000000000000068       0x38 _build/timer.o
- .debug_ranges  0x00000000000000a0       0x40 _build/system_nrf52840.o
+.debug_ranges   0x0000000000000000      0x128
+ .debug_ranges  0x0000000000000000       0xe8 _build/radio_002.o
+ .debug_ranges  0x00000000000000e8       0x40 _build/system_nrf52840.o
 
-.debug_macro    0x0000000000000000    0x20dd8
+.debug_macro    0x0000000000000000     0xf08a
  .debug_macro   0x0000000000000000      0x10d _build/radio_002.o
  .debug_macro   0x000000000000010d      0xaa2 _build/radio_002.o
  .debug_macro   0x0000000000000baf       0x3b _build/radio_002.o
@@ -497,30 +531,14 @@ LOAD linker stubs
  .debug_macro   0x0000000000001f22      0x392 _build/radio_002.o
  .debug_macro   0x00000000000022b4     0xccbe _build/radio_002.o
  .debug_macro   0x000000000000ef72       0x22 _build/radio_002.o
- .debug_macro   0x000000000000ef94      0x109 _build/timer.o
- .debug_macro   0x000000000000f09d       0x10 _build/timer.o
- .debug_macro   0x000000000000f0ad       0x22 _build/timer.o
- .debug_macro   0x000000000000f0cf       0x3b _build/timer.o
- .debug_macro   0x000000000000f10a       0x3b _build/timer.o
- .debug_macro   0x000000000000f145      0x402 _build/timer.o
- .debug_macro   0x000000000000f547    0x10c7a _build/timer.o
- .debug_macro   0x00000000000201c1      0xa65 _build/timer.o
- .debug_macro   0x0000000000020c26       0x96 _build/timer.o
- .debug_macro   0x0000000000020cbc       0x26 _build/timer.o
- .debug_macro   0x0000000000020ce2       0xf6 _build/system_nrf52840.o
+ .debug_macro   0x000000000000ef94       0xf6 _build/system_nrf52840.o
 
-.debug_line     0x0000000000000000     0x11ac
- .debug_line    0x0000000000000000      0x74d _build/radio_002.o
- .debug_line    0x000000000000074d      0x501 _build/timer.o
- .debug_line    0x0000000000000c4e      0x55e _build/system_nrf52840.o
+.debug_line     0x0000000000000000      0xeb4
+ .debug_line    0x0000000000000000      0x956 _build/radio_002.o
+ .debug_line    0x0000000000000956      0x55e _build/system_nrf52840.o
 
-.debug_str      0x0000000000000000    0x7a06e
- .debug_str     0x0000000000000000    0x53283 _build/radio_002.o
-                                      0x53e0f (size before relaxing)
- .debug_str     0x0000000000053283    0x26989 _build/timer.o
-                                      0x736b2 (size before relaxing)
- .debug_str     0x0000000000079c0c      0x462 _build/system_nrf52840.o
+.debug_str      0x0000000000000000    0x7a23d
+ .debug_str     0x0000000000000000    0x5355e _build/radio_002.o
+                                      0x541cb (size before relaxing)
+ .debug_str     0x000000000005355e    0x26cdf _build/system_nrf52840.o
                                       0x73b58 (size before relaxing)
-
-.debug_loc      0x0000000000000000       0x15
- .debug_loc     0x0000000000000000       0x15 _build/timer.o
