@@ -47,8 +47,14 @@ Use guide for linux ubuntu system
 
 # Current Progress 
 
-## What is modified from the original repo
-The original repo displays the output on the externally connected OED, it is now changed to log on the putty window through UART.
+## Simple Channel Hopping Implemented
+In order for the anchor to connect to multiple tags simultaneously, a simple channel hopping at the anchor is currently implemented.
+
+The advertising channels are changed once there is a timeout on that channel. if there is any response on that channel, the anchor will stay on that channel to collect enough data to calculate the distance. 
+
+Also, the tags are assigned with a fixed channel to receive the adv package and respond.
+
+There will be lots of issues if we deploy this way.
 
 ## Issues
 1. Distance calculation parameter tunning
@@ -63,8 +69,12 @@ The original repo displays the output on the externally connected OED, it is now
 3. Trilateration implementation
     - Receiving packages from multiple slaves. How does the master receive packages from multiple salves to calculate different RTT (channel hopping?)
         - for frequency hopping, since we are connecting at the advertising layer, we can only use channel 37(2402 MHz), 38(2426 MHz),39 (2480 MHz)
+        - The frequency hopping is not well implmemnted currently, we need to set up another timer to do hopping at fixed time interval at both the anchor and the tags to ensure that it can collect enough data.
         - NRF52833 Gazell Package allows simultaneous connection up to 8 devices (but it is beyond advertising layer)(but only slave can initialise coversation while master is the one can connect up to 8 devices, therefore maybe only applicable to inverse positioning method)
     - Better way of labelling the anchors for trilateration. The NRF devZone says there is no way to identify the board with serial ID etc with the firmware and the current measure is to mannually label the anchors, is there better way to label them?
+
+4. Hardware
+    - Will antenna affect the RTT? Maybe we can do some research on it
 
 
 
