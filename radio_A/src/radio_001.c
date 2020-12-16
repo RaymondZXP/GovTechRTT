@@ -28,7 +28,7 @@
 static uint8_t test_frame[255] = {0x00, 0x04, 0xFF, 0xC1, 0xFB, 0xE7};
 
 static uint32_t tx_pkt_counter = 0;
-static uint32_t radio_freq = 26; // advertising channels: 2400-2402, 2426-2428, 2478-2480
+static uint32_t radio_freq = 26;
 static uint32_t radio_freqs[3] = {0, 26, 78};
 
 static uint32_t timeout;
@@ -46,7 +46,8 @@ static uint32_t bincnt[NUM_SLAVES][NUM_BINS];
 static uint32_t highper = 0;
 static uint32_t txcntw = 0;
 
-static int radio_B_process_time = 4600; //need to tune this number
+static int radio_B_process_time = 4620; //need to tune this
+int channel_index = 1;
 
 void nrf_radio_init(void)
 {
@@ -74,7 +75,7 @@ void nrf_radio_init(void)
 #endif
 
   NRF_RADIO->FREQUENCY = (RADIO_FREQUENCY_MAP_Default << RADIO_FREQUENCY_MAP_Pos) + // 0*(2*8)
-                         ((radio_freq << RADIO_FREQUENCY_FREQUENCY_Pos) & RADIO_FREQUENCY_FREQUENCY_Msk);
+                         ((radio_freqs[channel_index] << RADIO_FREQUENCY_FREQUENCY_Pos) & RADIO_FREQUENCY_FREQUENCY_Msk);
 
   NRF_RADIO->PACKETPTR = (uint32_t)test_frame;
   NRF_RADIO->EVENTS_DISABLED = 0;
@@ -82,8 +83,30 @@ void nrf_radio_init(void)
   NRF_RADIO->TXPOWER = 0x0;
 }
 
+void nrf_radio_switch_channel(radio_frequency_index)
+{
+  NRF_RADIO->TASKS_STOP = 1;
+  NRF_RADIO->TASKS_DISABLE = 1;
+  NRF_RADIO->FREQUENCY = (RADIO_FREQUENCY_MAP_Default << RADIO_FREQUENCY_MAP_Pos) + // 0*(2*8)
+                         ((radio_freqs[radio_frequency_index] << RADIO_FREQUENCY_FREQUENCY_Pos) & RADIO_FREQUENCY_FREQUENCY_Msk);
+}
+
+// void TIMER1_IRQHandler(void)
+// {
+//   if ((NRF_TIMER1->EVENTS_COMPARE[0] != 0) && ((NRF_TIMER1->INTENSET & TIMER_INTENSET_COMPARE0_Msk) != 0))
+//   {
+//     NRF_TIMER1->EVENTS_COMPARE[0] = 0; //Clear compare register 0 event
+//     channel_index = (channel_index + 1) % 3;
+
+//     // nrf_radio_switch_channel(channel_index);
+//     NRF_LOG_INFO("Scheduler Triggered, index: %d", channel_index);
+//     NRF_LOG_FLUSH();
+//   }
+// }
+
 void nrf_ppi_config(void)
 {
+
   NRF_PPI->CH[6].TEP = (uint32_t)(&NRF_TIMER0->TASKS_CAPTURE[0]);
   NRF_PPI->CH[6].EEP = (uint32_t)(&NRF_RADIO->EVENTS_ADDRESS);
 
@@ -126,11 +149,15 @@ float calc_dist()
       val += database[s][i] * (i + 1); // number of measurements* traval time measured
       sum += database[s][i];           // number of measurements
     }
-    val = val / sum;
+
     // val = 0.5 * 18.737 * val;
 
-    NRF_LOG_INFO("Target Distance from slave %d:" NRF_LOG_FLOAT_MARKER "m\r\n", s, NRF_LOG_FLOAT(val));
-    NRF_LOG_FLUSH();
+    if (val != 0)
+    {
+      val = val / sum;
+      NRF_LOG_INFO("Target Distance from slave %d:" NRF_LOG_FLOAT_MARKER "m\r\n", s, NRF_LOG_FLOAT(val));
+      NRF_LOG_FLUSH();
+    }
 
     val = 0;
     sum = 0;
@@ -149,6 +176,7 @@ int main(void)
 
   uint32_t tempval, tempval1;
   int binNum;
+  // int channel_index = 1;
 
   NRF_CLOCK->EVENTS_HFCLKSTARTED = 0;
   NRF_CLOCK->TASKS_HFCLKSTART = 1;
@@ -165,6 +193,7 @@ int main(void)
 
   /* Configure the timer with prescaler 0, counts every 1 cycle of timer clock (16MHz) */
   timer0_capture_init(0);
+  // timer1_capture_init(6);
 
   nrf_radio_init();
   NRF_CLOCK->TASKS_HFCLKSTART = 1; /* Start HFCLK */
@@ -173,6 +202,11 @@ int main(void)
 
   while (true)
   {
+    nrf_radio_switch_channel(channel_index);
+    channel_index = (channel_index + 1) % 3;
+
+    NRF_LOG_INFO("Now at Channel: %d", NRF_RADIO->FREQUENCY);
+    NRF_LOG_FLUSH();
     while (dbptr < NUMBER_OF_MEASUREMENTS)
     {
       NRF_RADIO->PACKETPTR = (uint32_t)test_frame; /* Switch to tx buffer */
@@ -187,9 +221,6 @@ int main(void)
 
       NRF_TIMER0->TASKS_STOP = 1;
       NRF_TIMER0->TASKS_CLEAR = 1;
-      test_frame[4] = NRF_TIMER0->CC[0]; // transmit the timestamp when the package is transferred
-      NRF_LOG_INFO("Starting Time: %d", test_frame[4]);
-      NRF_LOG_FLUSH();
 
       /* Start Tx */
       NRF_RADIO->TASKS_TXEN = 0x1;
@@ -220,7 +251,6 @@ int main(void)
       {
         txcntw = 0;
         if (rx_timeouts > 10)
-          // PER>=20pct
           highper = 1;
         else
           highper = 0;
@@ -254,6 +284,7 @@ int main(void)
         while (NRF_RADIO->EVENTS_DISABLED == 0)
           ;
         rx_timeouts++;
+        break;
       }
       else
       {
@@ -283,15 +314,16 @@ int main(void)
             /* Packet is good, update stats */
             NRF_TIMER0->TASKS_STOP = 1;
             telp = NRF_TIMER0->CC[0];
+            // NRF_LOG_INFO(" %d", telp);
+            // NRF_LOG_FLUSH();
 
-            binNum = telp - rx_test_frame[4] - radio_B_process_time; // time now- time measured when package is transferred - process time at B
-            NRF_LOG_INFO("Receiving Time: %d", telp);
-            NRF_LOG_FLUSH();
+            binNum = telp - radio_B_process_time; /* Magic number to trim away dwell time in device B, etc */
+
             if ((binNum >= 0) && (binNum < NUM_BINS))
               bincnt[slave_id][binNum]++;
 
             dbptr++;
-            // NRF_TIMER0->TASKS_CLEAR = 1;
+            NRF_TIMER0->TASKS_CLEAR = 1;
           }
         }
       }

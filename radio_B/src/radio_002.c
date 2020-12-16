@@ -146,7 +146,7 @@ int main(void)
             /* CRC ok */
             rx_pkt_counter_crcok++;
 
-            for(i=2;i<6;i++)
+            for(i=2;i<5;i++)
                 response_test_frame[i]=test_frame[i];
         }
         else
@@ -155,7 +155,7 @@ int main(void)
             dbgcnt1++;
 
             /* Insert zeros as sequence number into the response packet indicating crc error to initiator */
-            for(i=2;i<6;i++)
+            for(i=2;i<5;i++)
                 response_test_frame[i]=0;
         }
         
